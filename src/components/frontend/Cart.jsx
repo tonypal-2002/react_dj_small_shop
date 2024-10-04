@@ -19,6 +19,9 @@ const Cart = () => {
             'Content-Type': 'application/json',
           },
         });
+
+        console.log(response);
+        
         
         if (response.ok) {
           const cartResponse = await response.json();

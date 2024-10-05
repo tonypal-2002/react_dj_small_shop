@@ -41,7 +41,7 @@ const Cart = () => {
     fetchCartItems(); // Fetch cart items when the component mounts
   }, []);
 
-  const apiRequest = async (endpoint, method, id) => {
+  const apiRequest = async (endpoint, method, id, action) => {
     const token = localStorage.getItem('token');
 
     const response = await fetch(`${API_URL}${endpoint}`, {
@@ -50,7 +50,10 @@ const Cart = () => {
         'Authorization': `Token ${token}`,
         'Content-Type': 'application/json',
       },
-      body: id ? JSON.stringify({ cart_id: id }) : undefined, // Stringify body only if id is provided
+      body: JSON.stringify({
+        cart_id: id, 
+        action: action
+      })
     });
 
     if (!response.ok) {
@@ -63,7 +66,7 @@ const Cart = () => {
 
   const incrementQty = async (item) => {
     try {
-      const updatedItem = await apiRequest('/increase-quantity', 'POST', item.id);
+      const updatedItem = await apiRequest('/cart/item/', 'PATCH', item.id, "increase");
       // setCartItems((prevItems) =>
       //   prevItems.map((prevItem) => (prevItem.id === item.id ? updatedItem : prevItem))
       // );      
@@ -80,7 +83,7 @@ const Cart = () => {
 
   const decrementQty = async (item) => {
     try {
-      const updatedItem = await apiRequest(`/decrease-quantity`, 'POST', item.id);
+      const updatedItem = await apiRequest(`/cart/item/`, 'PATCH', item.id, "decrease");
       // setCartItems((prevItems) =>
       //   prevItems.map((prevItem) => (prevItem.id === item.id ? updatedItem : prevItem))
       // );
@@ -97,7 +100,7 @@ const Cart = () => {
 
   const removeProduct = async (item) => {
     try {
-      const response = await apiRequest(`/remove-from-cart`, 'POST', item.id);
+      const response = await apiRequest(`/cart/item/`, 'DELETE', item.id);
       
       // setCartItems((prevItems) => prevItems.filter((prevItem) => prevItem.id !== item.id));
 
@@ -111,12 +114,19 @@ const Cart = () => {
 
   const clearCart = async () => {
     try {
-      const response = await apiRequest('/clear-cart', 'POST'); // Call apiRequest without cart_id
-      setMessage(response.message); // Set success message
-      fetchCartItems(); // Refresh cart items after clearing
+      const token = localStorage.getItem('token');
+      const response = await fetch(`${API_URL}/clear-cart`,{
+        method: "DELETE",
+        headers: {
+          'Authorization': `Token ${token}`,
+          'Content-Type': 'application/json',
+        }
+      });
+      setMessage(response.message);
+      fetchCartItems();
     } catch (error) {
-      setMessage(`Error clearing cart: ${error.message}`); // Set error message
-      console.error('Error clearing cart:', error);
+      setMessage(`Error removing product: ${error.message}`);
+      console.error(`Error removing product:`, error);
     }
   };
 
@@ -128,7 +138,7 @@ const Cart = () => {
         cartItems.map((item) => (
           <div key={item.id}>  {/* Ensure item.id is unique */}
             <button onClick={() => clearCart()}>Clear Cart</button>
-            <h3>{item.name}</h3>
+            <h3>{item.product_name}</h3>
             <p>Quantity: {item.qty}</p>
             <button onClick={() => incrementQty(item)}>+</button>
             <button onClick={() => decrementQty(item)}>-</button>

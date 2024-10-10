@@ -38,7 +38,7 @@ const TopBar = ({ isAuthenticated, user }) => {
                                 <li><a className="dropdown-item" href="/cart">Cart</a></li>
                                 <li><a className="dropdown-item" href="/order">Order</a></li>
                                 <li><a className="dropdown-item" href="/profile">Profile</a></li>
-                                <li><a className="dropdown-item" href="/logout">Logout</a></li>
+                                {/* <li><a className="dropdown-item" href="/logout">Logout</a></li> */}
                                 <li>
                                   {/* Logout button */}
                                   <button className="dropdown-item" onClick={handleLogout}>
